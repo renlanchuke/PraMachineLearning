@@ -1,0 +1,52 @@
+---
+title: "PraMachineLearning"
+author: "renlanchuke"
+date: "2015年12月23日"
+output: 
+  html_document:
+    keep_md: true
+---
+
+##Personal activity analysis
+####Load data
+<font size=4>Load data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants.
+The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har</font>
+```{r,echo=TRUE,results="hide"}
+#set the workpath
+setwd("F://gitRespository//PraMachineLearning")
+#download the training and testing data
+#trainingUrl<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+#testingUrl<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+#download.file(trainingUrl,destfile = "./trainingData.csv",method = "wininet")
+#download.file(testingUrl,destfile = "./testingData.csv",method = "wininet")
+#read the data file
+trainingData<-read.csv("./trainingData.csv")
+testingData<-read.csv("./testingData.csv")
+```
+
+####Exploratory data analysis
+
+```{r,echo=TRUE,results="hide"}
+summary(trainingData)
+head(trainingData)
+variableName <- names(trainingData)[3:159]
+sum(complete.cases(trainingData))
+```
+
+####Data proprocess
+```{r,echo=TRUE,results="hide"}
+#load package
+library(caret)
+library(kernlab)
+library(RANN)
+```
+
+```{r,each=true}
+#Data normalization
+preObj <- preProcess(trainingData[,variableName],method=c("center","scale"))
+trainingData1 <- predict(preObj,trainingData)
+
+#fill the missing value
+preObj1<-preProcess(trainingData[,variableName],method="knnImpute")
+trainingData2 <- predict(preObj1,trainingData1)
+```
