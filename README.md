@@ -1,5 +1,7 @@
 ## PraMachineLearning
 
+The result html url: http://renlanchuke.github.io/PraMachineLearning/
+
 ####This goal in the assignement is to predict personal activity using the data which is collected by the devices such as Jawbone Up, Nike FuelBand, and Fitbit.
 
 ####The first step is to clean the data
