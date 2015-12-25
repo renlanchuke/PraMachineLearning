@@ -22,13 +22,12 @@ testingData<-read.csv("./testingData.csv")
 set.seed(2333)
 ```
 
-####Exploratory data analysis
+###Exploratory data analysis
 
 
 ```r
 summary(trainingData)
 head(trainingData)
-
 sum(complete.cases(trainingData))
 ```
 
@@ -40,10 +39,6 @@ library(caret)
 ```
 
 ```
-## Warning: package 'caret' was built under R version 3.2.3
-```
-
-```
 ## Loading required package: lattice
 ## Loading required package: ggplot2
 ```
@@ -51,18 +46,7 @@ library(caret)
 ```r
 library(kernlab)
 library(RANN)
-```
-
-```
-## Warning: package 'RANN' was built under R version 3.2.3
-```
-
-```r
 library(randomForest)
-```
-
-```
-## Warning: package 'randomForest' was built under R version 3.2.3
 ```
 
 ```
@@ -73,7 +57,7 @@ library(randomForest)
 ```r
 library(ggplot2)
 ```
-####Data preprocess
+###Data preprocess
 
 ```r
 #remove the factor variable
@@ -123,7 +107,7 @@ qplot(PC1,PC2,data=trainingPCA,col=classe)
 
 ![](analysis_files/figure-html/pca-1.png) 
 
-####Create the training data and testing data
+###Create the training data and testing data
 
 ```r
 #create the train set and validate set 
@@ -136,7 +120,7 @@ testing <- trainingSet[-inTrain,]
 #tinyTraining <- training[tinyTrain,]
 ```
 
-####Machine learning:using random forest
+###Machine learning:using random forest
 
 ```r
 rfFit <- train(classe~.,data = training,methods="rf",
@@ -206,7 +190,7 @@ confusionMatrix(testing$classe,rfPred)
 ## Balanced Accuracy      1.0000   0.9986   0.9977   0.9996   0.9995
 ```
 
-####Predict the value
+###Predict the value
 
 ```r
 predict(rfFit,newdata=testingSet)
