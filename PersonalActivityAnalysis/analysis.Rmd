@@ -1,0 +1,125 @@
+---
+title: "PraMachineLearning"
+author: "renlanchuke"
+date: "2015年12月23日"
+output: 
+  html_document:
+    keep_md: true
+---
+
+##Personal activity analysis
+####Load data
+<font size=4>Load data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants.
+The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har</font>
+```{r,echo=TRUE,results="hide"}
+#set the workpath
+rm(list=ls())
+setwd("F://gitRespository//PraMachineLearning")
+#download the training and testing data
+#trainingUrl<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+#testingUrl<-"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+#download.file(trainingUrl,destfile = "./trainingData.csv",method = "wininet")
+#download.file(testingUrl,destfile = "./testingData.csv",method = "wininet")
+#read the data file
+trainingData<-read.csv("./trainingData.csv")
+testingData<-read.csv("./testingData.csv")
+set.seed(2333)
+
+```
+
+###Exploratory data analysis
+
+```{r,echo=TRUE,results="hide"}
+summary(trainingData)
+head(trainingData)
+sum(complete.cases(trainingData))
+```
+
+####Data proprocess
+```{r,echo=TRUE,warning=FALSE}
+#load package
+library(caret)
+library(kernlab)
+library(RANN)
+library(randomForest)
+library(ggplot2)
+
+```
+###Data preprocess
+```{r,echo=TRUE,cache=TRUE}
+#remove the factor variable
+variableName <- names(trainingData)
+preVariables <- variableName[3:159]
+facVariable <- sapply(preVariables,function(x){
+    is.factor(trainingData[,x])
+})
+
+goodVarNames <- preVariables[!facVariable]
+
+#remove the all na variable in testingData
+predVariables <- sapply(goodVarNames, function(x){
+    sum(is.na(testingData[,x]))<5
+})
+
+predicts <-goodVarNames[predVariables]
+
+trainingSet <- trainingData[,c(predicts,variableName[160])]
+
+testingSet <-testingData[,c(predicts,"problem_id")]
+
+#Data normalization
+
+preObjNormlization <-preProcess(trainingSet[,predicts],method=c("center","scale"))
+trainingSet <- predict(preObjNormlization,trainingSet)
+testingSet <- predict(preObjNormlization,testingSet)
+#fill the missing value
+preObjknn<-preProcess(trainingSet[,predicts],method="knnImpute")
+trainingSet[,predicts] <- predict(preObjknn,trainingSet[,predicts])
+#testingSet[,goodVarNames] <- predict(preObjknn,testingSet[,goodVarNames])
+#predict(preObj1,trainingData1[,variableName])
+#meanVal<-colMeans(trainingData1[,variableName],na.rm = TRUE)
+#names(meanVal)
+```
+
+###PCA analysis
+```{r pca, echo=TRUE,cache=TRUE}
+#pca analysis
+preObjPCA<-preProcess(trainingSet[,predicts],method="pca",pcaComp = 2)
+trainingPCA <- predict(preObjPCA,trainingSet)
+#plot the pca parameter respect by classe
+
+qplot(PC1,PC2,data=trainingPCA,col=classe)
+
+```
+
+###Create the training data and testing data
+```{r SpilitData,echo=TRUE,cache=TRUE}
+#create the train set and validate set 
+inTrain <- createDataPartition(y=trainingSet$classe,p=0.7,list = FALSE)
+
+training <- trainingSet[inTrain,]
+testing <- trainingSet[-inTrain,]
+
+#tinyTrain <- createDataPartition(y=training$classe,p=0.1,list = FALSE)
+#tinyTraining <- training[tinyTrain,]
+```
+
+###Machine learning:using random forest
+```{r machineLearning,echo=TRUE,cache=TRUE}
+rfFit <- train(classe~.,data = training,methods="rf",
+               trControl=trainControl(method = "cv",number = 3,verboseIter = TRUE))
+rfPred <- predict(rfFit,newdata=testing)
+confusionMatrix(testing$classe,rfPred)
+
+```
+
+###Predict the value
+```{r,echo=TRUE,cache=TRUE}
+predict(rfFit,newdata=testingSet)
+```
+
+
+
+
+
+
