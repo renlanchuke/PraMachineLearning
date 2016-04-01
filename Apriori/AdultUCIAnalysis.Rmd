@@ -1,9 +1,14 @@
 ---
-title: "Preparing and Mining data"
-author: "段海兵"
+title: "AdultUCI Dataset Analysis"
+author: "renlanchuke"
 date: "2016年3月30日"
-output: html_document
+output: 
+  html_document:
+    keep_md: true
 ---
+来源:[Introduction to arules – A computational environment for mining
+association rules and frequent item sets][1]
+
 数据集来源加州大学欧文分校机器学习数据库http://archive.ics.uci.edu/ml/
 
 Adult数据集：美国人口统计局关于影响收入因素（如年龄，工作类别，教育等）调查问卷数据，有4.8万个记录。
@@ -91,3 +96,5 @@ inspect(head(rulesIncomeLarge, n = 3, by = "confidence"))
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
 write(rulesIncomeSmall, file = "data.csv", sep = ",", col.names = NA)
 ```
+
+[1]:https://cran.r-project.org/web/packages/arules/vignettes/arules.pdf

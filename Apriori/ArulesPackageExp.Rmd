@@ -1,9 +1,13 @@
 ---
-title: "Arules Exploring"
-author: "段海兵"
+title: "Arules Package Exploring"
+author: "renlanchuke"
 date: "2016年3月30日"
-output: html_document
+output: 
+  html_document:
+    keep_md: true
 ---
+来源:[Introduction to arules – A computational environment for mining
+association rules and frequent item sets][1]
 
 ###1 分析处理交易数据集
 Epub是一个电子出版平台下载文件的数据集 http://epub.wu-wien.ac.at
@@ -53,4 +57,4 @@ EpubTidLists
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
 as(EpubTidLists[1:3], "list")
 ```
-
+[1]:https://cran.r-project.org/web/packages/arules/vignettes/arules.pdf
