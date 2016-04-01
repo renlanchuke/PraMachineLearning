@@ -1,0 +1,56 @@
+---
+title: "Arules Exploring"
+author: "段海兵"
+date: "2016年3月30日"
+output: html_document
+---
+
+###1 分析处理交易数据集
+Epub是一个电子出版平台下载文件的数据集 http://epub.wu-wien.ac.at
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+#加载arules包
+library(arules)
+data("Epub")
+Epub
+```
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+summary(Epub)
+```
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+year <- strftime(as.POSIXlt(transactionInfo(Epub)[["TimeStamp"]]), "%Y")
+table(year)
+```
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+Epub2003 <- Epub[year == "2003"]
+length(Epub2003)
+```
+
+交易数据是一个二进制关联矩阵
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+image(Epub2003)
+```
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+transactionInfo(Epub2003[size(Epub2003) > 20])
+```
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+inspect(Epub2003[1:5])
+```
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+as(Epub2003[1:5], "list")
+```
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+EpubTidLists <- as(Epub, "tidLists")
+EpubTidLists
+```
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+as(EpubTidLists[1:3], "list")
+```
+
