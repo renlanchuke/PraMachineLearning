@@ -1,0 +1,52 @@
+---
+title: " Extending arules with a new interest measure"
+author: "renlanchuke"
+date: "2016年3月31日"
+output: 
+  html_document:
+    keep_md: true
+---
+
+来源:[Introduction to arules – A computational environment for mining
+association rules and frequent item sets][1]
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+#加载arules包
+library(arules)
+data("Adult")
+```
+Eclat算法在等价类上求交集，将概念格划分为子概念格，然后自顶向上搜索，求频繁相集
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+fsets <- eclat(Adult, parameter = list(support = 0.05),control = list(verbose=FALSE))
+```
+找到每个相集的支持度
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+singleItems <- fsets[size(items(fsets)) == 1]
+## Get the col numbers we have support for
+singleSupport <- quality(singleItems)$support
+names(singleSupport) <- unlist(LIST(items(singleItems),
+decode = FALSE))
+head(singleSupport, n = 5)
+```
+
+计算出全置信度
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+itemsetList <- LIST(items(fsets), decode = FALSE)
+allConfidence <- quality(fsets)$support /
+sapply(itemsetList, function(x)
+max(singleSupport[as.character(x)]))
+quality(fsets) <- cbind(quality(fsets), allConfidence)
+```
+
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+summary(fsets)
+```
+找到所有关于Education的相集，然后按全置信度排序
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+fsetsEducation <- subset(fsets, subset = items %pin% "education")
+inspect(sort(fsetsEducation[size(fsetsEducation)>1],by = "allConfidence")[1 : 3])
+```
+
+
+[1]:https://cran.r-project.org/web/packages/arules/vignettes/arules.pdf
