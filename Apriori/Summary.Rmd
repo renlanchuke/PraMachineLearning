@@ -1,0 +1,14 @@
+---
+title: "Summary and Outlook"
+author: "renlanchuke"
+date: "2016年4月2日"
+output: 
+  html_document:
+    keep_md: true
+---
+来源:[Introduction to arules – A computational environment for mining
+association rules and frequent item sets][1]
+
+
+
+[1]:https://cran.r-project.org/web/packages/arules/vignettes/arules.pdf

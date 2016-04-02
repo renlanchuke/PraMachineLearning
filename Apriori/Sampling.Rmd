@@ -16,6 +16,9 @@ library(arules)
 data("Adult")
 ```
 
+最小支持度为supp=0.05，误差epsilon=0.1，置信度1-c=0.9
+
+计算合理的取样大小
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
 supp <- 0.05
 epsilon <- 0.1
@@ -27,28 +30,41 @@ n
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
 AdultSample <- sample(Adult, n, replace = TRUE)
 ```
-支持度大于0.05的频集图
+
+比较样本中相集和数据相集支持度的差异
+
+样品相集支持度为柱形，原始数据库相集为线型
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
 itemFrequencyPlot(AdultSample, population = Adult, support = supp,
 cex.names = 0.7)
 ```
 
+提升率lift： P(i | sample)/P(i | population)
+用提升率比较样本数据和原始数据库的差异
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
 itemFrequencyPlot(AdultSample, population = Adult,support = supp, lift = TRUE,cex.names = 0.9)
 ```
 
 USER时间就是执行表达式消耗的时间(CPU时间)
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+#计算完整数据消耗时间
 time <- system.time(itemsets <- eclat(Adult,
 parameter = list(support = supp), control = list(verbose = FALSE)))
 time
 ```
 
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+#计算样本数据消耗时间
 timeSample <- system.time(itemsetsSample <- eclat(AdultSample,
 parameter = list(support = supp), control = list(verbose = FALSE)))
 timeSample
 ```
+
+加速比
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+time[1] / timeSample[1]
+```
+
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
 itemsets
 itemsetsSample

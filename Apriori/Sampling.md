@@ -25,6 +25,9 @@ library(arules)
 data("Adult")
 ```
 
+最小支持度为supp=0.05，误差epsilon=0.1，置信度1-c=0.9
+
+计算合理的取样大小
 
 ```r
 supp <- 0.05
@@ -42,7 +45,10 @@ n
 ```r
 AdultSample <- sample(Adult, n, replace = TRUE)
 ```
-支持度大于0.05的频集图
+
+比较样本中相集和数据相集支持度的差异
+
+样品相集支持度为柱形，原始数据库相集为线型
 
 ```r
 itemFrequencyPlot(AdultSample, population = Adult, support = supp,
@@ -51,6 +57,8 @@ cex.names = 0.7)
 
 ![](Sampling_files/figure-html/unnamed-chunk-4-1.png) 
 
+提升率lift： P(i | sample)/P(i | population)
+用提升率比较样本数据和原始数据库的差异
 
 ```r
 itemFrequencyPlot(AdultSample, population = Adult,support = supp, lift = TRUE,cex.names = 0.9)
@@ -61,6 +69,7 @@ itemFrequencyPlot(AdultSample, population = Adult,support = supp, lift = TRUE,ce
 USER时间就是执行表达式消耗的时间(CPU时间)
 
 ```r
+#计算完整数据消耗时间
 time <- system.time(itemsets <- eclat(Adult,
 parameter = list(support = supp), control = list(verbose = FALSE)))
 time
@@ -68,11 +77,12 @@ time
 
 ```
 ##    user  system elapsed 
-##    0.44    0.00    0.43
+##    0.47    0.00    0.53
 ```
 
 
 ```r
+#计算样本数据消耗时间
 timeSample <- system.time(itemsetsSample <- eclat(AdultSample,
 parameter = list(support = supp), control = list(verbose = FALSE)))
 timeSample
@@ -80,8 +90,20 @@ timeSample
 
 ```
 ##    user  system elapsed 
-##    0.11    0.00    0.11
+##    0.08    0.00    0.11
 ```
+
+加速比
+
+```r
+time[1] / timeSample[1]
+```
+
+```
+## user.self 
+##     5.875
+```
+
 
 ```r
 itemsets
