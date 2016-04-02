@@ -1,0 +1,74 @@
+---
+title: "Sampling"
+author: "renlanchuke"
+date: "2016年4月2日"
+output: 
+    html_document:
+        keep_md: true
+---
+
+来源:[Introduction to arules – A computational environment for mining
+association rules and frequent item sets][1]
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+#加载arules包
+library(arules)
+data("Adult")
+```
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+supp <- 0.05
+epsilon <- 0.1
+c <- 0.1
+n <- -2 * log(c)/ (supp * epsilon^2)
+n
+```
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+AdultSample <- sample(Adult, n, replace = TRUE)
+```
+支持度大于0.05的频集图
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+itemFrequencyPlot(AdultSample, population = Adult, support = supp,
+cex.names = 0.7)
+```
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+itemFrequencyPlot(AdultSample, population = Adult,support = supp, lift = TRUE,cex.names = 0.9)
+```
+
+USER时间就是执行表达式消耗的时间(CPU时间)
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+time <- system.time(itemsets <- eclat(Adult,
+parameter = list(support = supp), control = list(verbose = FALSE)))
+time
+```
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+timeSample <- system.time(itemsetsSample <- eclat(AdultSample,
+parameter = list(support = supp), control = list(verbose = FALSE)))
+timeSample
+```
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+itemsets
+itemsetsSample
+```
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+match <- match(itemsets, itemsetsSample, nomatch = 0)
+sum(match > 0) / length(itemsets)
+```
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+summary(quality(itemsets[match == 0])$support)
+summary(quality(itemsetsSample[-match])$support)
+```
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+supportItemsets <- quality(itemsets[which(match > 0)])$support
+supportSample <- quality(itemsetsSample[match])$support
+accuracy <- 1 - abs(supportSample - supportItemsets) / supportItemsets
+summary(accuracy)
+```
+
+[1]:https://cran.r-project.org/web/packages/arules/vignettes/arules.pdf
