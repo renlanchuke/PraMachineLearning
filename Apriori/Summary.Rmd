@@ -6,9 +6,40 @@ output:
   html_document:
     keep_md: true
 ---
-来源:[Introduction to arules – A computational environment for mining
-association rules and frequent item sets][1]
 
-
-
-[1]:https://cran.r-project.org/web/packages/arules/vignettes/arules.pdf
+加载arules程序包
+```{r,echo=TRUE,warning=FALSE,cache=TRUE}
+library(arules)  
+```
+加载数据集
+```{r,echo=TRUE,warning=FALSE,cache=TRUE}
+data(Groceries) 
+```
+求频繁项集
+```{r,echo=TRUE,warning=FALSE,cache=TRUE}
+frequentsets=eclat(Groceries,parameter=list(support=0.05,maxlen=10)) 
+```
+察看求得的频繁项集
+```{r,echo=TRUE,warning=FALSE,cache=TRUE}
+inspect(frequentsets[1:10])
+```
+根据支持度对求得的频繁项集排序并察看（等价于inspect(sort(frequentsets)[1:10]）
+```{r,echo=TRUE,warning=FALSE,cache=TRUE}
+inspect(sort(frequentsets,by="support")[1:10])  
+```
+求关联规则
+```{r,echo=TRUE,warning=FALSE,cache=TRUE}
+rules=apriori(Groceries,parameter=list(support=0.01,confidence=0.01))
+```
+查看关联规则概要
+```{r,echo=TRUE,warning=FALSE,cache=TRUE}
+summary(rules)    
+```
+求所需要的关联规则子集
+```{r,echo=TRUE,warning=FALSE,cache=TRUE}
+x=subset(rules,subset=rhs%in%"whole milk"&lift>=1.2) 
+```
+根据支持度对求得的关联规则子集排序并察看
+```{r,echo=TRUE,warning=FALSE,cache=TRUE}
+inspect(sort(x,by="support")[1:5]) 
+```
