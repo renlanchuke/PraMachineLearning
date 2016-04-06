@@ -15,6 +15,9 @@ library(arules)
 ```{r,echo=TRUE,warning=FALSE,cache=TRUE}
 data(Groceries) 
 ```
+
+
+
 求频繁项集
 ```{r,echo=TRUE,warning=FALSE,cache=TRUE}
 frequentsets=eclat(Groceries,parameter=list(support=0.05,maxlen=10)) 

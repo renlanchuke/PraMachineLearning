@@ -28,6 +28,8 @@ names(singleSupport) <- unlist(LIST(items(singleItems),
 decode = FALSE))
 head(singleSupport, n = 5)
 ```
+全置信度
+![](ExtendingArules_files/figure-html/allConfidence.png) 
 
 计算出全置信度
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}

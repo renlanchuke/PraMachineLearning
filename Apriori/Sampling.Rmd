@@ -14,6 +14,7 @@ association rules and frequent item sets][1]
 #加载arules包
 library(arules)
 data("Adult")
+Adult
 ```
 
 最小支持度为supp=0.05，误差epsilon=0.1，置信度1-c=0.9
@@ -29,20 +30,6 @@ n
 
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
 AdultSample <- sample(Adult, n, replace = TRUE)
-```
-
-比较样本中相集和数据相集支持度的差异
-
-样品相集支持度为柱形，原始数据库相集为线型
-```{r,cache=TRUE,echo=TRUE,warning=FALSE}
-itemFrequencyPlot(AdultSample, population = Adult, support = supp,
-cex.names = 0.7)
-```
-
-提升率lift： P(i | sample)/P(i | population)
-用提升率比较样本数据和原始数据库的差异
-```{r,cache=TRUE,echo=TRUE,warning=FALSE}
-itemFrequencyPlot(AdultSample, population = Adult,support = supp, lift = TRUE,cex.names = 0.9)
 ```
 
 USER时间就是执行表达式消耗的时间(CPU时间)
@@ -64,6 +51,22 @@ timeSample
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
 time[1] / timeSample[1]
 ```
+
+
+比较样本中相集和数据相集支持度的差异
+
+样品相集支持度为柱形，原始数据库相集为线型
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+itemFrequencyPlot(AdultSample, population = Adult, support = supp,
+cex.names = 0.7)
+```
+
+提升率lift： P(i | sample)/P(i | population)
+用提升率比较样本数据和原始数据库的差异
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+itemFrequencyPlot(AdultSample, population = Adult,support = supp, lift = TRUE,cex.names = 0.9)
+```
+
 
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
 itemsets

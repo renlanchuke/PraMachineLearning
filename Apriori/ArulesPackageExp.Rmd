@@ -9,28 +9,75 @@ output:
 来源:[Introduction to arules – A computational environment for mining
 association rules and frequent item sets][1]
 
-###1 分析处理交易数据集
+
 Epub是一个电子出版平台下载文件的数据集 http://epub.wu-wien.ac.at
 
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
 #加载arules包
 library(arules)
 data("Epub")
+ls()
 Epub
 ```
 
+查看Epub中前5天记录
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+inspect(Epub[1:5])
+```
+
+查看前5条记录长度，也就是包含的物品数量
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+size(Epub)[1:5]
+```
+
+查看Epub数据集概要
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
 summary(Epub)
 ```
+查看Epub对象的内部结构
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+class(Epub)
+str(Epub)
+```
 
+查看Epub对象的内部结构
+
+Epub是一个transaction类型数据，由三部分构成
+
+data：用稀疏矩阵存放的交易信息，每行为一个交易记录，每列表示一个物品，矩阵中数据值为（？）1，表示在这次交易中有这个物品
+
+item: 列名等,item信息
+
+itemSet：交易ID等transaction额外信息
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+str(Epub)
+```
+
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+#查看列标签
+itemInfo(Epub)[["labels"]][1:5]
+#查看交易ID
+transactionInfo(Epub)[["transactionID"]][1:5]
+#查看交易时间
+transactionInfo(Epub)[["TimeStamp"]][1:5]
+```
+
+
+查看数据记录发生在哪些年
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
 year <- strftime(as.POSIXlt(transactionInfo(Epub)[["TimeStamp"]]), "%Y")
 table(year)
 ```
 
+选取2003年的所有下载记录
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
 Epub2003 <- Epub[year == "2003"]
 length(Epub2003)
+```
+
+查看Epub2003前5条记录
+```{r,cache=TRUE,echo=TRUE,warning=FALSE}
+inspect(Epub2003[1:5])
 ```
 
 交易数据是一个二进制关联矩阵
@@ -38,14 +85,13 @@ length(Epub2003)
 image(Epub2003)
 ```
 
+找出一次下载超过20本的列
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
 transactionInfo(Epub2003[size(Epub2003) > 20])
 ```
 
-```{r,cache=TRUE,echo=TRUE,warning=FALSE}
-inspect(Epub2003[1:5])
-```
 
+将前5条记录转化为list数据
 ```{r,cache=TRUE,echo=TRUE,warning=FALSE}
 as(Epub2003[1:5], "list")
 ```

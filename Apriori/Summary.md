@@ -22,6 +22,14 @@ library(arules)
 ```r
 data(Groceries) 
 ```
+
+
+```r
+image(Groceries) 
+```
+
+![](Summary_files/figure-html/unnamed-chunk-3-1.png) 
+
 求频繁项集
 
 ```r
@@ -42,7 +50,7 @@ frequentsets=eclat(Groceries,parameter=list(support=0.05,maxlen=10))
 ## Absolute minimum support count: 491 
 ## 
 ## create itemset ... 
-## set transactions ...[169 item(s), 9835 transaction(s)] done [0.00s].
+## set transactions ...[169 item(s), 9835 transaction(s)] done [0.01s].
 ## sorting and recoding items ... [28 item(s)] done [0.00s].
 ## creating sparse bit matrix ... [28 row(s), 9835 column(s)] done [0.00s].
 ## writing  ... [31 set(s)] done [0.00s].
@@ -110,7 +118,7 @@ rules=apriori(Groceries,parameter=list(support=0.01,confidence=0.01))
 ## set item appearances ...[0 item(s)] done [0.00s].
 ## set transactions ...[169 item(s), 9835 transaction(s)] done [0.00s].
 ## sorting and recoding items ... [88 item(s)] done [0.00s].
-## creating transaction tree ... done [0.00s].
+## creating transaction tree ... done [0.01s].
 ## checking subsets of size 1 2 3 4 done [0.00s].
 ## writing ... [610 rule(s)] done [0.00s].
 ## creating S4 object  ... done [0.00s].

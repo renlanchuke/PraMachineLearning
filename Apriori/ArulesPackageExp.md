@@ -4,27 +4,22 @@ renlanchuke
 来源:[Introduction to arules – A computational environment for mining
 association rules and frequent item sets][1]
 
-###1 分析处理交易数据集
+分析处理交易数据集
 Epub是一个电子出版平台下载文件的数据集 http://epub.wu-wien.ac.at
 
 
 ```r
 #加载arules包
 library(arules)
+data("Epub")
+ls()
 ```
 
 ```
-## Loading required package: Matrix
-## 
-## Attaching package: 'arules'
-## 
-## The following objects are masked from 'package:base':
-## 
-##     abbreviate, write
+## [1] "Epub"
 ```
 
 ```r
-data("Epub")
 Epub
 ```
 
@@ -34,6 +29,32 @@ Epub
 ##  936 items (columns)
 ```
 
+查看Epub中前5天记录
+
+```r
+inspect(Epub[1:5])
+```
+
+```
+##       items                    transactionID TimeStamp          
+## 10792 {doc_154}                session_4795  2003-01-02 09:59:00
+## 10793 {doc_3d6}                session_4797  2003-01-02 20:46:01
+## 10794 {doc_16f}                session_479a  2003-01-02 23:50:38
+## 10795 {doc_11d,doc_1a7,doc_f4} session_47b7  2003-01-03 07:55:50
+## 10796 {doc_83}                 session_47bb  2003-01-03 10:27:44
+```
+
+查看前5条记录长度，也就是包含的物品数量
+
+```r
+size(Epub)[1:5]
+```
+
+```
+## [1] 1 1 1 3 1
+```
+
+查看Epub数据集概要
 
 ```r
 summary(Epub)
@@ -72,7 +93,103 @@ summary(Epub)
 ## 10793  session_4797 2003-01-02 20:46:01
 ## 10794  session_479a 2003-01-02 23:50:38
 ```
+查看Epub对象的内部结构
 
+```r
+class(Epub)
+```
+
+```
+## [1] "transactions"
+## attr(,"package")
+## [1] "arules"
+```
+
+```r
+str(Epub)
+```
+
+```
+## Formal class 'transactions' [package "arules"] with 3 slots
+##   ..@ data       :Formal class 'ngCMatrix' [package "Matrix"] with 5 slots
+##   .. .. ..@ i       : int [1:25893] 7 199 31 0 64 935 422 0 194 0 ...
+##   .. .. ..@ p       : int [1:15730] 0 1 2 3 6 7 8 9 11 12 ...
+##   .. .. ..@ Dim     : int [1:2] 936 15729
+##   .. .. ..@ Dimnames:List of 2
+##   .. .. .. ..$ : NULL
+##   .. .. .. ..$ : NULL
+##   .. .. ..@ factors : list()
+##   ..@ itemInfo   :'data.frame':	936 obs. of  1 variable:
+##   .. ..$ labels: chr [1:936] "doc_11d" "doc_13d" "doc_14c" "doc_14e" ...
+##   ..@ itemsetInfo:'data.frame':	15729 obs. of  2 variables:
+##   .. ..$ transactionID: chr [1:15729] "session_4795" "session_4797" "session_479a" "session_47b7" ...
+##   .. ..$ TimeStamp    : POSIXct[1:15729], format: "2003-01-02 09:59:00" ...
+```
+
+查看Epub对象的内部结构
+
+Epub是一个transaction类型数据，由三部分构成
+
+data：用稀疏矩阵存放的交易信息，每行为一个交易记录，每列表示一个物品，矩阵中数据值为（？）1，表示在这次交易中有这个物品
+
+item: 列名等,item信息
+
+itemSet：交易ID等transaction额外信息
+
+```r
+str(Epub)
+```
+
+```
+## Formal class 'transactions' [package "arules"] with 3 slots
+##   ..@ data       :Formal class 'ngCMatrix' [package "Matrix"] with 5 slots
+##   .. .. ..@ i       : int [1:25893] 7 199 31 0 64 935 422 0 194 0 ...
+##   .. .. ..@ p       : int [1:15730] 0 1 2 3 6 7 8 9 11 12 ...
+##   .. .. ..@ Dim     : int [1:2] 936 15729
+##   .. .. ..@ Dimnames:List of 2
+##   .. .. .. ..$ : NULL
+##   .. .. .. ..$ : NULL
+##   .. .. ..@ factors : list()
+##   ..@ itemInfo   :'data.frame':	936 obs. of  1 variable:
+##   .. ..$ labels: chr [1:936] "doc_11d" "doc_13d" "doc_14c" "doc_14e" ...
+##   ..@ itemsetInfo:'data.frame':	15729 obs. of  2 variables:
+##   .. ..$ transactionID: chr [1:15729] "session_4795" "session_4797" "session_479a" "session_47b7" ...
+##   .. ..$ TimeStamp    : POSIXct[1:15729], format: "2003-01-02 09:59:00" ...
+```
+
+
+```r
+#查看列标签
+itemInfo(Epub)[["labels"]][1:5]
+```
+
+```
+## [1] "doc_11d" "doc_13d" "doc_14c" "doc_14e" "doc_150"
+```
+
+```r
+#查看交易ID
+transactionInfo(Epub)[["transactionID"]][1:5]
+```
+
+```
+## [1] "session_4795" "session_4797" "session_479a" "session_47b7"
+## [5] "session_47bb"
+```
+
+```r
+#查看交易时间
+transactionInfo(Epub)[["TimeStamp"]][1:5]
+```
+
+```
+## [1] "2003-01-02 09:59:00 CST" "2003-01-02 20:46:01 CST"
+## [3] "2003-01-02 23:50:38 CST" "2003-01-03 07:55:50 CST"
+## [5] "2003-01-03 10:27:44 CST"
+```
+
+
+查看数据记录发生在哪些年
 
 ```r
 year <- strftime(as.POSIXlt(transactionInfo(Epub)[["TimeStamp"]]), "%Y")
@@ -85,6 +202,7 @@ table(year)
 ##  986 1376 1610 3010 4052 4692    3
 ```
 
+选取2003年的所有下载记录
 
 ```r
 Epub2003 <- Epub[year == "2003"]
@@ -95,25 +213,7 @@ length(Epub2003)
 ## [1] 986
 ```
 
-交易数据是一个二进制关联矩阵
-
-```r
-image(Epub2003)
-```
-
-![](ArulesPackageExp_files/figure-html/unnamed-chunk-5-1.png) 
-
-
-```r
-transactionInfo(Epub2003[size(Epub2003) > 20])
-```
-
-```
-##       transactionID           TimeStamp
-## 11092  session_56e2 2003-04-30 01:30:38
-## 11371  session_6308 2003-08-18 06:16:12
-```
-
+查看Epub2003前5条记录
 
 ```r
 inspect(Epub2003[1:5])
@@ -128,6 +228,28 @@ inspect(Epub2003[1:5])
 ## 10796 {doc_83}                 session_47bb  2003-01-03 10:27:44
 ```
 
+交易数据是一个二进制关联矩阵
+
+```r
+image(Epub2003)
+```
+
+![](ArulesPackageExp_files/figure-html/unnamed-chunk-11-1.png) 
+
+找出一次下载超过20本的列
+
+```r
+transactionInfo(Epub2003[size(Epub2003) > 20])
+```
+
+```
+##       transactionID           TimeStamp
+## 11092  session_56e2 2003-04-30 01:30:38
+## 11371  session_6308 2003-08-18 06:16:12
+```
+
+
+将前5条记录转化为list数据
 
 ```r
 as(Epub2003[1:5], "list")
