@@ -1,0 +1,39 @@
+---
+title: "sparkR"
+author: "renlanchuke"
+date: "2016年4月12日"
+output: 
+  html_document:
+    keep_md: true
+---
+
+加载sparkR,spark环境变量已经预先设置
+```{r,echo=TRUE}
+library(SparkR, lib.loc = c(file.path(Sys.getenv("SPARK_HOME"), "R", "lib")))
+#设定内存大小
+sc <- sparkR.init(master = "local[*]", sparkEnvir = list(spark.driver.memory="8g"))
+```
+context是r与spark集群的交互的入口,所以首先创建一个sqlContext
+```{r,echo=TRUE}
+sqlContext <- sparkRSQL.init(sc)
+```
+###创建dataframe
+在sqlContext中，可以创建dataframes数据结构，数据可以是本地数据，也可以Hive table
+从本地创建dataframe
+```{r,echo=TRUE}
+df <- createDataFrame(sqlContext, faithful)
+head(df)
+```
+
+从数据源创建dataframe
+```{r,echo=TRUE}
+sc <- sparkR.init(sparkPackages="com.databricks:spark-csv_2.11:1.0.3")
+sqlContext <- sparkRSQL.init(sc)
+```
+
+```{r,echo=TRUE}
+#read.df可以从数据源创建dataframe
+people <- read.df(sqlContext, "./examples/src/main/resources/people.json", "json")
+head(people)
+printSchema(people)
+```
