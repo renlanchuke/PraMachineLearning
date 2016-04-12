@@ -82,12 +82,12 @@ img {
 ##     summary, table, transform</code></pre>
 <pre class="r"><code>#设定内存大小
 sc &lt;- sparkR.init(master = &quot;local[*]&quot;, sparkEnvir = list(spark.driver.memory=&quot;8g&quot;))</code></pre>
-<pre><code>## Launching java with spark-submit command F:\spark-1.6.1/bin/spark-submit.cmd   --driver-memory &quot;8g&quot; sparkr-shell C:\Users\Hansel\AppData\Local\Temp\RtmpGeh5oW\backend_port1c0c722a751b</code></pre>
-<p>context是r与spark集群的交互的入口</p>
-<pre class="r"><code>sc &lt;- sparkR.init()</code></pre>
-<pre><code>## Re-using existing Spark Context. Please stop SparkR with sparkR.stop() or restart R to create a new Spark Context</code></pre>
+<pre><code>## Launching java with spark-submit command F:\spark-1.6.1/bin/spark-submit.cmd   --driver-memory &quot;8g&quot; sparkr-shell C:\Users\Hansel\AppData\Local\Temp\RtmpQJmomz\backend_portf846b9f4f7</code></pre>
+<p>context是r与spark集群的交互的入口,所以首先创建一个sqlContext</p>
 <pre class="r"><code>sqlContext &lt;- sparkRSQL.init(sc)</code></pre>
-<p>创建dataframe</p>
+<div id="dataframe" class="section level3">
+<h3>创建dataframe</h3>
+<p>在sqlContext中，可以创建dataframes数据结构，数据可以是本地数据，也可以Hive table 从本地创建dataframe</p>
 <pre class="r"><code>df &lt;- createDataFrame(sqlContext, faithful)
 head(df)</code></pre>
 <pre><code>##   eruptions waiting
@@ -97,6 +97,27 @@ head(df)</code></pre>
 ## 4     2.283      62
 ## 5     4.533      85
 ## 6     2.883      55</code></pre>
+<p>从数据源创建dataframe</p>
+<pre class="r"><code>sc &lt;- sparkR.init(sparkPackages=&quot;com.databricks:spark-csv_2.11:1.0.3&quot;)</code></pre>
+<pre><code>## Re-using existing Spark Context. Please stop SparkR with sparkR.stop() or restart R to create a new Spark Context</code></pre>
+<pre class="r"><code>sqlContext &lt;- sparkRSQL.init(sc)</code></pre>
+<p>导入json数据</p>
+<pre class="r"><code>#read.df可以从数据源创建dataframe
+people &lt;- read.df(sqlContext, &quot;F:\\spark-1.6.1\\examples\\src\\main\\resources\\people.json&quot;, &quot;json&quot;)
+head(people)</code></pre>
+<pre><code>##   age    name
+## 1  NA Michael
+## 2  30    Andy
+## 3  19  Justin</code></pre>
+<pre class="r"><code>printSchema(people)</code></pre>
+<pre><code>## root
+##  |-- age: long (nullable = true)
+##  |-- name: string (nullable = true)</code></pre>
+<p>将数据写入Parquet文件</p>
+<pre class="r"><code>setwd(&quot;F:\\spark-1.6.1&quot;)
+write.df(people,path=&quot;people.parquet&quot;,source=&quot;parquet&quot;,mode=&quot;overwrite&quot;)</code></pre>
+<pre><code>## NULL</code></pre>
+</div>
 
 
 </div>

@@ -20,10 +20,11 @@ sqlContext <- sparkRSQL.init(sc)
 ###创建dataframe
 在sqlContext中，可以创建dataframes数据结构，数据可以是本地数据，也可以Hive table
 从本地创建dataframe
-```{r,echo=TRUE}
+```{r,echo=TRUE,cache=TRUE}
 df <- createDataFrame(sqlContext, faithful)
 head(df)
 ```
+
 
 从数据源创建dataframe
 ```{r,echo=TRUE}
@@ -31,9 +32,15 @@ sc <- sparkR.init(sparkPackages="com.databricks:spark-csv_2.11:1.0.3")
 sqlContext <- sparkRSQL.init(sc)
 ```
 
+导入json数据
 ```{r,echo=TRUE}
 #read.df可以从数据源创建dataframe
-people <- read.df(sqlContext, "./examples/src/main/resources/people.json", "json")
+people <- read.df(sqlContext, "F:\\spark-1.6.1\\examples\\src\\main\\resources\\people.json", "json")
 head(people)
 printSchema(people)
+```
+
+将数据写入Parquet文件
+```{r,echo=TRUE}
+write.df(people,path="people.parquet",source="parquet",mode="overwrite")
 ```
