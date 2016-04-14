@@ -28,7 +28,7 @@ sc <- sparkR.init(master = "local[*]", sparkEnvir = list(spark.driver.memory="8g
 ```
 
 ```
-## Launching java with spark-submit command F:\spark-1.6.1/bin/spark-submit.cmd   --driver-memory "8g" sparkr-shell C:\Users\Hansel\AppData\Local\Temp\RtmpQJmomz\backend_portf846b9f4f7
+## Launching java with spark-submit command F:\spark-1.6.1/bin/spark-submit.cmd   --driver-memory "8g" sparkr-shell C:\Users\Hansel\AppData\Local\Temp\RtmpCofJCs\backend_port283c646741f6
 ```
 context是r与spark集群的交互的入口,所以首先创建一个sqlContext
 
@@ -53,6 +53,7 @@ head(df)
 ## 5     4.533      85
 ## 6     2.883      55
 ```
+
 
 从数据源创建dataframe
 
@@ -96,7 +97,6 @@ printSchema(people)
 将数据写入Parquet文件
 
 ```r
-setwd("F:\\spark-1.6.1")
 write.df(people,path="people.parquet",source="parquet",mode="overwrite")
 ```
 

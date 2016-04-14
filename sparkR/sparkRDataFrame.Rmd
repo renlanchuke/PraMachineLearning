@@ -1,0 +1,21 @@
+---
+title: "SparkDataFrame"
+author: "renlanchuke"
+date: "2016年4月14日"
+output: 
+  html_document:
+    keep_md: true
+---
+
+加载sparkR,spark环境变量已经预先设置
+```{r,echo=TRUE}
+library(SparkR, lib.loc = c(file.path(Sys.getenv("SPARK_HOME"), "R", "lib")))
+#设定内存大小
+sc <- sparkR.init(master = "local[*]", sparkEnvir = list(spark.driver.memory="8g"))
+```
+
+```{r,echo=TRUE}
+sqlContext <- sparkRSQL.init(sc)
+df <- createDataFrame(sqlContext,faithful)
+df
+```
