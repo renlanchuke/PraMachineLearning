@@ -1,7 +1,7 @@
 library("R.matlab")
-fileName<-file.path("C:/Users/Hansel/Downloads/2016ËØïÈ¢ò/B/BÈ¢òÈôÑ‰ª∂","genotype.dat")
+fileName<-file.path("C:/Users/Hansel/Downloads/2016 ‘Ã‚/B/BÃ‚∏Ωº˛","genotype.dat")
 genotype <- read.table(fileName,header = TRUE)
-phenotype <- read.table("C:/Users/Hansel/Downloads/2016ËØïÈ¢ò/B/BÈ¢òÈôÑ‰ª∂/phenotype.txt",header=FALSE,sep="\n")
+phenotype <- read.table("C:/Users/Hansel/Downloads/2016 ‘Ã‚/B/BÃ‚∏Ωº˛/phenotype.txt",header=FALSE,sep="\n")
 library(data.table)
 geno_phenotype <- data.table(genotype)
 geno_phenotype <- geno_phenotype[,phenotype:=phenotype]
@@ -30,10 +30,10 @@ for(i in 1:(length(col_name)-1)){
     }
     
 }
-#Ê†πÊçÆÂõæÂÉèÔºåÈòàÂÄºÂèñ0.75
+#∏˘æ›ÕºœÒ£¨„–÷µ»°0.75
 qplot(1:28335,conditionPro$Freq,conditionPro)
 
-#È™åËØÅÊØèÂàóÂèñÂÄºÈÉΩ‰∏∫3Áßç
+#—È÷§√ø¡–»°÷µ∂ºŒ™3÷÷
 count=0
 for(i in 1:(length(col_name)-1)){
     
@@ -43,15 +43,15 @@ for(i in 1:(length(col_name)-1)){
     }
 }
 
-#Á≠õÈÄâÂ±ûÊÄß
-conditionProFilter <- conditionPro[conditionPro$Freq>=0.6,]
+#…∏—° Ù–‘
+conditionProFilter <- conditionPro[conditionPro$Freq>=0.65,]
 #conditionProFilter <- conditionPro
 filterCol <- conditionProFilter$colname
 dataFilter <- test[,filterCol]
 dataFilter <- cbind(dataFilter,phenotype=test$phenotype)
 dataFilter$phenotype <- as.factor(dataFilter$phenotype)
 
-#ÂÜ≥Á≠ñÊ†ëËÆ≠ÁªÉ
+#æˆ≤ﬂ ˜—µ¡∑
 #library(caret)
 set.seed(2333)
 inTrain <- createDataPartition(y=dataFilter$phenotype,p=0.8,list = FALSE)
@@ -67,7 +67,7 @@ confusionMatrix(testing$phenotype,Pred)
 
 
 
-##Ê£ÄÊµã
+##ºÏ≤‚
 data_test <- test[,c("rs1888759","phenotype")]  
 data_test_df <- tbl_df(data_test)
 data_test_grouo <- group_by(data_test_df,rs1888759,phenotype)
@@ -100,7 +100,7 @@ for(i in 1:(length(col_name)-1)){
     
 }
 
-#ÂõûÂΩíÂàÜÊûê
+#ªÿπÈ∑÷Œˆ
 re_data <- test
 
 for(i in 1:(length(col_name)-1)){
@@ -129,7 +129,7 @@ dataPCA <- predict(preObjPCA,re_data)
 qplot(PC1,PC2,data=dataPCA,col=phenotype)
 
 
-#Á≠õÈÄâÂ±ûÊÄß
+#…∏—° Ù–‘
 conditionProFilter2 <- conditionPro[conditionPro$Freq>=0.55,]
 #conditionProFilter <- conditionPro
 filterCol2 <- conditionProFilter2$colname
@@ -167,8 +167,8 @@ confusionMatrix(training$phenotype,Pred)
 
 
 #select the importance varianle
-#Á≠õÈÄâÂ±ûÊÄß
-conditionProFilter <- conditionPro[conditionPro$Freq>=0.6,]
+#…∏—° Ù–‘
+conditionProFilter <- conditionPro[conditionPro$Freq>=0.53,]
 #conditionProFilter <- conditionPro
 
 filterCol <- conditionProFilter$colname
@@ -190,7 +190,7 @@ while(length(filterCol)>2){
     Pred <- predict(modFit,newdata=testing)
     accuracy_cur <- sum(testing$phenotype == Pred)/length(Pred)
     print(accuracy_cur)
-    val_Imp <- importance(modFit,1)
+    val_Imp <- importance(modFit,2)
     tem_colNames <- row.names(val_Imp)
     new_colNames <- tem_colNames[val_Imp<=quantile(val_Imp,0.9)]
     
@@ -202,5 +202,100 @@ while(length(filterCol)>2){
 }
 
 
+#ª≠Õº±»Ωœ
+#####0.53
+len <- length(result_NodeOOP_0.53)
+i=1
+SNPnum <- c()
+accuracy_Gini_0.53 <- c()
+accuracy_OOP_0.53 <- c()
+while(i <= len){
+    SNPnum <- c(SNPnum,length(result_NodePurity_0.53[[i]]))
+    accuracy_Gini_0.53 <- c (accuracy_Gini_0.53,result_NodePurity_0.53[[i+1]])
+    accuracy_OOP_0.53 <- c (accuracy_OOP_0.53,result_NodeOOP_0.53[[i+1]])
+    
+    i=i+2
+}
+dataFrame_test_0.53 <- data.frame(SNPnum=SNPnum,
+                                  accuracy_Gini_0.53=accuracy_Gini_0.53,
+                                  accuracy_OOP_0.53 =accuracy_OOP_0.53)
 
 
+
+dataFrame_test_0.53_re <- melt(dataFrame_test_0.53,id="SNPnum")
+ggplot(data=dataFrame_test_0.53_re, aes(x=SNPnum, y=value, colour=variable)) + geom_line()+
+    geom_point(size=2, shape=20)+scale_x_continuous(trans = c("log10"))
+
+####0.55
+
+len <- length(result_NodeOOP_0.55)
+i=1
+SNPnum <- c()
+accuracy_Gini_0.55 <- c()
+accuracy_OOP_0.55 <- c()
+while(i <= len){
+    SNPnum <- c(SNPnum,length(result_NodePurity_0.55[[i]]))
+    accuracy_Gini_0.55 <- c (accuracy_Gini_0.55,result_NodePurity_0.55[[i+1]])
+    accuracy_OOP_0.55 <- c (accuracy_OOP_0.55,result_NodeOOP_0.55[[i+1]])
+    
+    i=i+2
+}
+dataFrame_test_0.55 <- data.frame(SNPnum=SNPnum,
+                                  accuracy_Gini_0.55=accuracy_Gini_0.55,
+                                  accuracy_OOP_0.55 =accuracy_OOP_0.55)
+
+
+
+
+dataFrame_test_0.55_re <- melt(dataFrame_test_0.55,id="SNPnum")
+ggplot(data=dataFrame_test_0.55_re, aes(x=SNPnum, y=value, colour=variable)) + geom_line()+
+    geom_point(size=2, shape=20)+scale_x_continuous(trans = c("log10"))
+
+
+####0.60
+len <- length(result_NodeOOP_0.60)
+i=1
+SNPnum <- c()
+accuracy_Gini_0.6 <- c()
+accuracy_OOP_0.6 <- c()
+while(i <= len){
+    SNPnum <- c(SNPnum,length(result_NodePurity_0.6[[i]]))
+    accuracy_Gini_0.6 <- c (accuracy_Gini_0.6,result_NodePurity_0.6[[i+1]])
+    accuracy_OOP_0.6 <- c (accuracy_OOP_0.6,result_NodeOOP_0.6[[i+1]])
+    
+    i=i+2
+}
+dataFrame_test_0.6 <- data.frame(SNPnum=SNPnum,
+                                  accuracy_Gini_0.6=accuracy_Gini_0.6,
+                                  accuracy_OOP_0.6 =accuracy_OOP_0.6)
+
+dataFrame_test_0.6_re <- melt(dataFrame_test_0.6,id="SNPnum")
+ggplot(data=dataFrame_test_0.6_re, aes(x=SNPnum, y=value, colour=variable)) + geom_line()+
+    geom_point(size=2, shape=20)+scale_x_continuous(trans = c("log10"))
+
+
+####0.65
+len <- length(result_NodeOOP_0.65)
+i=1
+SNPnum <- c()
+accuracy_Gini_0.65 <- c()
+accuracy_OOP_0.65 <- c()
+while(i <= len){
+    SNPnum <- c(SNPnum,length(result_NodePurity_0.65[[i]]))
+    accuracy_Gini_0.65 <- c (accuracy_Gini_0.65,result_NodePurity_0.65[[i+1]])
+    accuracy_OOP_0.65 <- c (accuracy_OOP_0.65,result_NodeOOP_0.65[[i+1]])
+    
+    i=i+2
+}
+dataFrame_test_0.65 <- data.frame(SNPnum=SNPnum,
+                                 accuracy_Gini_0.65=accuracy_Gini_0.65,
+                                 accuracy_OOP_0.65 =accuracy_OOP_0.65)
+
+dataFrame_test_0.65_re <- melt(dataFrame_test_0.65,id="SNPnum")
+ggplot(data=dataFrame_test_0.65_re, aes(x=SNPnum, y=value, colour=variable)) + geom_line()+
+    geom_point(size=2, shape=20)+scale_x_continuous(trans = c("log10"))
+
+####∫œ≤¢ÕºœÒ
+dataFrame_all <- rbind(dataFrame_test_0.53_re,dataFrame_test_0.55_re,dataFrame_test_0.6_re,dataFrame_test_0.65_re)
+ggplot(data=dataFrame_all, aes(x=SNPnum, y=value, colour=variable)) + geom_line()+
+    geom_point(size=3, shape=20)+scale_x_continuous(trans = c("log10"))
