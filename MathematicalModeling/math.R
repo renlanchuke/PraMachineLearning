@@ -1,3 +1,5 @@
+#######################################################################
+##########读取数据并处理
 library("R.matlab")
 fileName<-file.path("C:/Users/Hansel/Downloads/2016试题/B/B题附件","genotype.dat")
 genotype <- read.table(fileName,header = TRUE)
@@ -14,30 +16,32 @@ for(i in 1:(length(col_name)-1)){
    }
 }
 
+#############################################################################
+######                      question1
+#############################################################################
+re_data <- test
 for(i in 1:(length(col_name)-1)){
-    name <- col_name[i]
-    curTableALL <- table(test[,i])
-    curTableTrue <- table(test[test$phenotype==1,i])
-    dataFrame <- data.frame(colname=name,curTableTrue/curTableALL)
-    if(i==1){
-        conditionPro <- dataFrame
-    }else{
-        conditionPro <- rbind(conditionPro,dataFrame)
-    }
     
+    levels(re_data[,i]) <- c("-1","0","1")
 }
-#图像
-ggplot(data=conditionPro,aes(x=1:28335,y=conditionPro$Freq))+geom_point()+xlab("位点")+ylab("致病条件概率")
+for(i in 1:(length(col_name)-1)){
+    
+    re_data[,i] <- as.integer(as.character(re_data[,i]))
+}
 
-#验证每列取值都为3种
-count=0
-for(i in 1:(length(col_name)-1)){
-    
-    len <- length(table(test[,i]))
-    if(len==3){
-       count=count+1 
-    }
-}
+
+# #图像
+# ggplot(data=conditionPro,aes(x=1:28335,y=conditionPro$Freq))+geom_point()+xlab("位点")+ylab("致病条件概率")
+# 
+# #验证每列取值都为3种
+# count=0
+# for(i in 1:(length(col_name)-1)){
+#     
+#     len <- length(table(test[,i]))
+#     if(len==3){
+#        count=count+1 
+#     }
+# }
 
 #筛选属性
 conditionProFilter <- conditionPro[conditionPro$Freq>=0.65,]
@@ -126,7 +130,7 @@ qplot(PC1,PC2,data=dataPCA,col=phenotype)
 
 
 #筛选属性
-conditionProFilter2 <- conditionPro[conditionPro$Freq>=0.55,]
+conditionProFilter2 <- conditionPro[conditionPro$Freq>=0.65,]
 #conditionProFilter <- conditionPro
 filterCol2 <- conditionProFilter2$colname
 dataFilter2 <- re_data[,filterCol2]
@@ -161,11 +165,24 @@ confusionMatrix(testing$phenotype,Pred)
 Pred <- predict(svmfit,newdata=training)
 confusionMatrix(training$phenotype,Pred)
 
+#############################################################################
+#########question2
+############################################################################
+#########计算位点碱基型条件概率
+for(i in 1:(length(col_name)-1)){
+    name <- col_name[i]
+    curTableALL <- table(test[,i])
+    curTableTrue <- table(test[test$phenotype==1,i])
+    dataFrame <- data.frame(colname=name,curTableTrue/curTableALL)
+    if(i==1){
+        conditionPro <- dataFrame
+    }else{
+        conditionPro <- rbind(conditionPro,dataFrame)
+    }
+    
+}
 
-#select the importance varianle
-#筛选属性
 conditionProFilter <- conditionPro[conditionPro$Freq>=0.53,]
-#conditionProFilter <- conditionPro
 
 filterCol <- conditionProFilter$colname
 dataFilter <- test[,filterCol]
@@ -296,10 +313,27 @@ dataFrame_all <- rbind(dataFrame_test_0.53_re,dataFrame_test_0.55_re,dataFrame_t
 ggplot(data=dataFrame_all, aes(x=SNPnum, y=value, colour=variable)) + geom_line()+
     geom_point(size=3, shape=20)+scale_x_continuous(trans = c("log10"))
 
+##################结果验证question2
+val_col_select <- result_NodePurity_0.6[[59]]
+filterCol <- val_col_select
+dataFilter <- test[,filterCol]
+dataFilter <- cbind(dataFilter,phenotype=test$phenotype)
+dataFilter$phenotype <- as.factor(dataFilter$phenotype)
 
+set.seed(2333)
+inTrain <- createDataPartition(y=dataFilter$phenotype,p=0.7,list = FALSE)
 
+training <- dataFilter[inTrain,]
+testing <- dataFilter[-inTrain,]
+modFit <- randomForest(phenotype~.,ntree=1500,data=training,importance=TRUE,do.trace=FALSE)
+#modFit <- train(phenotype~.,method="rf",data=training, 
+#trControl=trainControl(method = "cv",number = 5,verboseIter = TRUE))
+Pred <- predict(modFit,newdata=testing)
+confusionMatrix(testing$phenotype,Pred)
 
-###question3
+###############################################################################
+#########                        question3 wrong
+##############################################################################
 set.seed(2333)
 directory <- "D:/2016试题/B/B题附件/gene_info"
 fileList <- list.files(directory)
@@ -315,14 +349,14 @@ for(i in 1:length(dirPaths)){
 }
 names(gene_info_list) <- fileList
 
-All_SNPs <- colnames(genotype)
-length(All_SNPs)
-gene_info_intersect_list <- list()
-
-for(i in 1:length(dirPaths)){
-    
-    gene_info_intersect_list <- c(gene_info_intersect_list,list(intersect(All_SNPs,gene_info_list[[i]])))
-}
+# All_SNPs <- colnames(genotype)
+# length(All_SNPs)
+# gene_info_intersect_list <- list()
+# 
+# for(i in 1:length(dirPaths)){
+#     
+#     gene_info_intersect_list <- c(gene_info_intersect_list,list(intersect(All_SNPs,gene_info_list[[i]])))
+# }
 names(gene_info_intersect_list) <- fileList
 
 library(caret)
@@ -377,29 +411,8 @@ modFit <- train(phenotype~.,method="rf",data=training,
 Pred <- predict(modFit,newdata=testing)
 confusionMatrix(Pred,testing$phenotype,positive = "1")
 
-aaaa <- confusionMatrix(Pred,testing$phenotype,positive = "1")
-
-######################################################
-##################结果验证question2
-val_col_select <- result_NodePurity_0.6[[59]]
-filterCol <- val_col_select
-dataFilter <- test[,filterCol]
-dataFilter <- cbind(dataFilter,phenotype=test$phenotype)
-dataFilter$phenotype <- as.factor(dataFilter$phenotype)
-
-set.seed(2333)
-inTrain <- createDataPartition(y=dataFilter$phenotype,p=0.7,list = FALSE)
-
-training <- dataFilter[inTrain,]
-testing <- dataFilter[-inTrain,]
-modFit <- randomForest(phenotype~.,ntree=1500,data=training,importance=TRUE,do.trace=FALSE)
-#modFit <- train(phenotype~.,method="rf",data=training, 
-                #trControl=trainControl(method = "cv",number = 5,verboseIter = TRUE))
-Pred <- predict(modFit,newdata=testing)
-confusionMatrix(testing$phenotype,Pred)
-
 #######################################################################
-####question3
+#######                     question3
 #######################################################################
 set.seed(2333)
 directory <- "C:/Users/Hansel/Downloads/2016试题/B/B题附件/gene_info"
@@ -462,7 +475,7 @@ names(gene_info_list) <- fileList
 gene_index <- c()
 gene_snp_list <- c()
 for(i in 1:300){
-    len <- length(intersect(as.character(gene_info_list[[i]]),val_selct_ques))
+    len <- length(intersect(as.character(gene_info_list[[i]]), result_NodePurity_0.6[[57]]))
     if(len >0){
         gene_index <- c(gene_index,i)
         gene_snp_list <- c(gene_snp_list,as.character(gene_info_list[[i]]))
@@ -517,8 +530,8 @@ gplot_ques3 <- ggplot(ques3_plot_list, aes(x=id,y=accuracy))+geom_point()
 gplot_ques3+geom_hline(aes(yintercept=0.6033), colour="#990000")
 
 ques3_gene_selct <- names(gene_info_list[gene_index])
-
-####question4
+########################################################################
+#######                           question4
 #########################################################################
 multi_phenos <- read.table("C:/Users/Hansel/Downloads/2016试题/B/B题附件/multi_phenos.txt")
 
