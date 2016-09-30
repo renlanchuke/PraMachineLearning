@@ -47,8 +47,7 @@ url="http://bowtie-bio.sourceforge.net/recount/ExpressionSets/bodymap_eset.RData
 download.file(url,destfile = ".\\test.Rdata", method="auto") 
 load(".\\test.Rdata")
 ```
-
-## An expression set
+ion set
 
 This kind of object in R contains the three tables
 
