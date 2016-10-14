@@ -242,21 +242,96 @@ for(i in 1:100000){
 coop_frame <- data.frame(ind=1:100000,sum=coop_array)
 qplot(x=ind,y=sum/2000,data = coop_frame)
 #############################################################
-#######test
-f1 <- function(x,a,b) a*x+b
-a <- 5
-b <- -10
-uniroot(f1,c(0,10),a=a,b=b,tol=0.0001)
+#######penalty2
+set.seed(2333)
+iniProb <- 0.2
+poplation <- c(rep(1,iniProb*2000),rep(0,2000-iniProb*2000))
+poplation <- sample(poplation)
+record <- rep(0,2000)
+k=6
+N=5
+c=0.1
 
-testfunc <- function(x,N){
-    (1-(1-x)^N)/(N*x*(1-x)^(N-1))
+b_payoff <- log2(k)
+cooperater <- function(NC){
+    b_payoff-c*(k-N)/NC
 }
 
-x_test <- seq(0.00001,0.99999,0.01)
-y_test <- c()
-
-for(i in x_test){
-    y_test=c(y_test,testfunc(i,6))
+defector <- function(NC){
+    if(NC>0){
+        b_payoff
+    }else{
+        0
+    }
 }
-y_test_kog <- log2(y_test)
-qplot(x=x_test[1:80],y=y_test_kog[1:80])
+
+getAgentPayoff <- function(){
+    index_array=1:2000
+    agents1 = sample(index_array,6,replace = FALSE)
+    index=agents1[1]
+    sum=getPayoff(agents1)
+    
+    agents2=sample(index_array[index_array!=index],5,replace = FALSE)
+    agents2=c(index,agents2)
+    sum=sum+getPayoff(agents2)
+    
+    agents3=sample(index_array[index_array!=index],5,replace = FALSE)
+    agents3=c(index,agents3)
+    sum=sum+getPayoff(agents3)
+    
+    agents4=sample(index_array[index_array!=index],5,replace = FALSE)
+    agents4=c(index,agents4)
+    sum=sum+getPayoff(agents4)
+    
+    agentPayoff <- list(ind=index,pay=sum/4)
+}
+
+getPayoff <- function(agents){
+   
+        NC = sum(poplation[agents])
+       
+        index=agents[1]
+        if(NC==0){
+            payoff=0
+        }else{
+            if(poplation[index]==0){
+                payoff=defector(NC)
+            }else{
+                payoff=cooperater(NC)
+            }
+        }
+        
+        if((record[agents[1]])==1){
+            0
+        }
+        tem_agents1 = agents[record[agents]==0]
+        tem_agents2 = agents[record[agents]==1]
+
+        record[tem_agents1]=1-poplation[tem_agents1]
+        record[tem_agents2]=0
+        payoff
+    
+}
+
+coop_array <- rep(-1,100000)
+for(i in 1:100000){
+    agent_i <- getAgentPayoff()
+    agent_j <- getAgentPayoff()
+    
+    trans_prob <- (agent_i$pay-agent_j$pay)/b_payoff
+    
+    if(trans_prob < 0){
+        poplation[agent_i$ind]=sample(c(poplation[agent_i$ind],poplation[agent_j$ind]),
+                                      1,prob = c(1+trans_prob,-trans_prob))
+    }
+    if(trans_prob>0){
+        poplation[agent_j$ind]=sample(c(poplation[agent_j$ind],poplation[agent_i$ind]),
+                                      1,prob = c(1-trans_prob,trans_prob))
+    }
+    
+    
+    coop_array[i]=sum(poplation)
+}
+
+coop_frame <- data.frame(ind=1:100000,sum=coop_array)
+qplot(x=ind,y=sum/2000,data = coop_frame)
