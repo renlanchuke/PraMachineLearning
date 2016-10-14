@@ -14,14 +14,18 @@ pstate <- function(x,N,k,c){
 
 plot_x_k <- function(N,c,len){
     k_array=(N+1):(N+len)
-    results=c()
-    results2=c()
+    results = c()
+ 
     for(i in k_array){
-        temRes =uniroot(sstate,c(0.0001,0.9999),N=N,k=i,c=c,tol = 0.0001)
-      
-        results=c(results,temRes$root)
+        tryCatch({
+            temRes =uniroot(sstate,c(0.0001,0.9999),N=N,k=i,c=c,tol = 0.0001)
+            results = c(results,temRes$root)
+        },  error=function(e){
+            print("no solver")
+            
+        })
     }
-    resultFrame <- data.frame(k=k_array,x_eq=results)
+    resultFrame <- data.frame(k=k_array[1:length(results)],x_eq=results)
   
 }
 
@@ -30,10 +34,13 @@ plot_x_k2 <- function(N,c,len){
    
     results2=c()
     for(i in k_array){
+       tryCatch({
+           temRes2 =uniroot(pstate,c(0.0001,0.9999),N=N,k=i,c=c,tol = 0.0001)
+            results2=c(results2,temRes2$root)
+            },error=function(){
+                results2=c(results2,0)
+            })
        
-        temRes2 =uniroot(pstate,c(0.0001,0.9999),N=N,k=i,c=c,tol = 0.0001)
-        
-        results2=c(results2,temRes2$root)
         
     }
     resultFrame <- data.frame(k=k_array,x_eq=results2)
@@ -41,20 +48,60 @@ plot_x_k2 <- function(N,c,len){
 }
 
 resFrame <- plot_x_k(5,0.2,20)
-qplot(x=k,y=x_eq,data = resFrame)
+resFrame2 <- plot_x_k(3,0.2,20)
+resFrame3 <- plot_x_k(7,0.2,20)
+# frame_bind <- cbind(resFrame,resFrame2,resFrame3)
+# names(frame_bind) <- c("k1","x1","k2","x2","k3","x3")
 
-resFrame2 <- plot_x_k2(5,4,20)
-qplot(x=k,y=x_eq,data = resFrame2)
+# p <- ggplot(data = frame_bind)+
+#     geom_point(aes(x=k1,y=x1),size=4, shape=20,colour="red")+
+#     geom_line(aes(x=k1,y=x1),colour="red")+
+#     geom_point(aes(x=k2,y=x2),size=4, shape=15,colour="green")+
+#     geom_line(aes(x=k2,y=x2),colour="green")+
+#     geom_point(aes(x=k3,y=x3),size=4, shape=10,colour="blue")+
+#     geom_line(aes(x=k3,y=x3),colour="blue")+xlab("K")+ylab("Frequency of Cooperation")
+# 
+# p <- p+theme(legend.position="right")
+
+data_rbind <- rbind(resFrame2,resFrame,resFrame3)
+label <- c(rep("N=3",20),rep("N=5",20),rep("N=7",20))
+data_rbind[,"label"] <- as.factor(label)
+
+P <- ggplot(data = data_rbind,aes(x=k,y=x_eq,color=label,shape=label))+
+    geom_line()+geom_point(size=4)
+
+P <- P+xlab("K")+ylab("Frequency of Cooperation")
+p <- P+theme(legend.position=c(0.9,0.8),legend.title=element_blank())
+
+###########################
+#####compare c vs x
+resFrame <- plot_x_k(5,0.1,20)
+resFrame2 <- plot_x_k(5,0.2,20)
+resFrame3 <- plot_x_k(5,0.3,20)
+
+
+qplot(data=resFrame3,x=k,y=x_eq)
+data_rbind2 <- rbind(resFrame,resFrame2,resFrame3)
+label <- c(rep("c=0.1",dim(resFrame)[1]),
+               rep("c=0.2",dim(resFrame2)[1]),rep("c=0.3",dim(resFrame3)[1]))
+data_rbind2[,"label"] <- as.factor(label)
+
+P <- ggplot(data = data_rbind2,aes(x=k,y=x_eq,color=label,shape=label))+
+    geom_line()+geom_point(size=4)
+
+P <- P+xlab("c")+ylab("Frequency of Cooperation")
+p <- P+theme(legend.position=c(0.9,0.8),legend.title=element_blank())
+
 ######################################################################################
 #####dynamic evolution simulation
 set.seed(2333)
-iniProb <- 0.6
+iniProb <- 0.1
 poplation <- c(rep(1,iniProb*2000),rep(0,2000-iniProb*2000))
 poplation <- sample(poplation)
 payoff <- rep(0,100)
 k=6
 N=5
-c=0.2
+c=0.1
 
 b_payoff <- log2(k)
 cooperater <- function(NC){
@@ -63,7 +110,7 @@ cooperater <- function(NC){
 
 defector <- function(NC){
     if(NC>0){
-        log2(k)
+        log2(k)/2
     }else{
         0
     }
@@ -107,30 +154,18 @@ for(i in 1:100000){
     coop_array[i]=sum(poplation)
 }
 
-coop_frame <- data.frame(ind=1:100000,sum=coop_array)
-qplot(x=ind,y=sum/2000,data = coop_frame)
+coop_frame <- data.frame(coop_frame,sum2=coop_array)
+qplot(x=ind,y=sum2/2000,data = coop_frame)
+ggplot(data = coop_frame)+geom_point(aes(x=ind,y=sum/2000),colour="darkblue")
 
 feimi <- function(x){
     beta=0.9
     1/(1+exp(-beta*x))
 }
-# for(i in agent){
-#     if(NC==0){
-#         payoff[i]=0
-#     }
-#     else{
-#         if(poplation[i]==0){
-#             payoff[i]=defector(NC)
-#         }else{
-#             payoff[i]=cooperater(NC)
-#         }
-#     }
-# }
-
 #####################################################################################
 #####penalty simunation
 set.seed(2333)
-iniProb <- 0.8
+iniProb <- 0.5
 poplation <- c(rep(1,iniProb*2000),rep(0,2000-iniProb*2000))
 poplation <- sample(poplation)
 record <- rep(0,2000)
@@ -140,12 +175,12 @@ c=0.1
 
 b_payoff <- log2(k)
 cooperater <- function(NC){
-    log2(k)-c*(k-N)/NC
+    b_payoff-c*(k-N)/NC
 }
 
 defector <- function(NC){
     if(NC>0){
-        log2(k)
+        b_payoff
     }else{
         0
     }
@@ -157,9 +192,9 @@ getAgentPayoff <- function(){
     index=agents1[1]
     sum=getPayoff(agents1)
     
-    agents2=sample(index_array[index_array!=index],5,replace = FALSE)
-    agents2=c(index,agents2)
-    sum=sum+getPayoff(agents2)
+#     agents2=sample(index_array[index_array!=index],5,replace = FALSE)
+#     agents2=c(index,agents2)
+#     sum=sum+getPayoff(agents2)
     agentPayoff <- list(ind=index,pay=sum/2)
 }
 
@@ -209,7 +244,6 @@ qplot(x=ind,y=sum/2000,data = coop_frame)
 #############################################################
 #######test
 f1 <- function(x,a,b) a*x+b
- 
 a <- 5
 b <- -10
 uniroot(f1,c(0,10),a=a,b=b,tol=0.0001)
