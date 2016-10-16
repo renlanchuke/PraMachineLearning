@@ -1,9 +1,9 @@
 #######################################################################
-##########¶ÁÈ¡Êı¾İ²¢´¦Àí
+##########è¯»å–æ•°æ®å¹¶å¤„ç†
 library("R.matlab")
-fileName<-file.path("C:/Users/Hansel/Downloads/2016ÊÔÌâ/B/BÌâ¸½¼ş","genotype.dat")
+fileName<-file.path("C:/Users/Hansel/Downloads/2016è¯•é¢˜/B/Bé¢˜é™„ä»¶","genotype.dat")
 genotype <- read.table(fileName,header = TRUE)
-phenotype <- read.table("C:/Users/Hansel/Downloads/2016ÊÔÌâ/B/BÌâ¸½¼ş/phenotype.txt",header=FALSE,sep="\n")
+phenotype <- read.table("C:/Users/Hansel/Downloads/2016è¯•é¢˜/B/Bé¢˜é™„ä»¶/phenotype.txt",header=FALSE,sep="\n")
 library(data.table)
 geno_phenotype <- data.table(genotype)
 geno_phenotype <- geno_phenotype[,phenotype:=phenotype]
@@ -30,10 +30,10 @@ for(i in 1:(length(col_name)-1)){
 }
 
 
-# #Í¼Ïñ
-# ggplot(data=conditionPro,aes(x=1:28335,y=conditionPro$Freq))+geom_point()+xlab("Î»µã")+ylab("ÖÂ²¡Ìõ¼ş¸ÅÂÊ")
+# #å›¾åƒ
+# ggplot(data=conditionPro,aes(x=1:28335,y=conditionPro$Freq))+geom_point()+xlab("ä½ç‚¹")+ylab("è‡´ç—…æ¡ä»¶æ¦‚ç‡")
 # 
-# #ÑéÖ¤Ã¿ÁĞÈ¡Öµ¶¼Îª3ÖÖ
+# #éªŒè¯æ¯åˆ—å–å€¼éƒ½ä¸º3ç§
 # count=0
 # for(i in 1:(length(col_name)-1)){
 #     
@@ -43,7 +43,7 @@ for(i in 1:(length(col_name)-1)){
 #     }
 # }
 
-#É¸Ñ¡ÊôĞÔ
+#ç­›é€‰å±æ€§
 conditionProFilter <- conditionPro[conditionPro$Freq>=0.65,]
 #conditionProFilter <- conditionPro
 filterCol <- conditionProFilter$colname
@@ -51,7 +51,7 @@ dataFilter <- test[,filterCol]
 dataFilter <- cbind(dataFilter,phenotype=test$phenotype)
 dataFilter$phenotype <- as.factor(dataFilter$phenotype)
 
-#¾ö²ßÊ÷ÑµÁ·
+#å†³ç­–æ ‘è®­ç»ƒ
 #library(caret)
 set.seed(2333)
 inTrain <- createDataPartition(y=dataFilter$phenotype,p=0.8,list = FALSE)
@@ -67,7 +67,7 @@ confusionMatrix(testing$phenotype,Pred)
 
 
 
-##¼ì²â
+##æ£€æµ‹
 data_test <- test[,c("rs1888759","phenotype")]  
 data_test_df <- tbl_df(data_test)
 data_test_grouo <- group_by(data_test_df,rs1888759,phenotype)
@@ -100,7 +100,7 @@ for(i in 1:(length(col_name)-1)){
     
 }
 
-#»Ø¹é·ÖÎö
+#å›å½’åˆ†æ
 re_data <- test
 
 for(i in 1:(length(col_name)-1)){
@@ -129,7 +129,7 @@ dataPCA <- predict(preObjPCA,re_data)
 qplot(PC1,PC2,data=dataPCA,col=phenotype)
 
 
-#É¸Ñ¡ÊôĞÔ
+#ç­›é€‰å±æ€§
 conditionProFilter2 <- conditionPro[conditionPro$Freq>=0.65,]
 #conditionProFilter <- conditionPro
 filterCol2 <- conditionProFilter2$colname
@@ -168,7 +168,7 @@ confusionMatrix(training$phenotype,Pred)
 #############################################################################
 #########question2
 ############################################################################
-#########¼ÆËãÎ»µã¼î»ùĞÍÌõ¼ş¸ÅÂÊ
+#########è®¡ç®—ä½ç‚¹ç¢±åŸºå‹æ¡ä»¶æ¦‚ç‡
 for(i in 1:(length(col_name)-1)){
     name <- col_name[i]
     curTableALL <- table(test[,i])
@@ -215,7 +215,7 @@ while(length(filterCol)>2){
 }
 
 
-#»­Í¼±È½Ï
+#ç”»å›¾æ¯”è¾ƒ
 #####0.53
 len <- length(result_NodeOOP_0.53)
 i=1
@@ -308,12 +308,12 @@ dataFrame_test_0.65_re <- melt(dataFrame_test_0.65,id="SNPnum")
 ggplot(data=dataFrame_test_0.65_re, aes(x=SNPnum, y=value, colour=variable)) + geom_line()+
     geom_point(size=2, shape=20)+scale_x_continuous(trans = c("log10"))
 
-####ºÏ²¢Í¼Ïñ
+####åˆå¹¶å›¾åƒ
 dataFrame_all <- rbind(dataFrame_test_0.53_re,dataFrame_test_0.55_re,dataFrame_test_0.6_re,dataFrame_test_0.65_re)
 ggplot(data=dataFrame_all, aes(x=SNPnum, y=value, colour=variable)) + geom_line()+
     geom_point(size=3, shape=20)+scale_x_continuous(trans = c("log10"))
 
-##################½á¹ûÑéÖ¤question2
+##################ç»“æœéªŒè¯question2
 val_col_select <- result_NodePurity_0.6[[59]]
 filterCol <- val_col_select
 dataFilter <- test[,filterCol]
@@ -335,7 +335,7 @@ confusionMatrix(testing$phenotype,Pred)
 #########                        question3 wrong
 ##############################################################################
 set.seed(2333)
-directory <- "D:/2016ÊÔÌâ/B/BÌâ¸½¼ş/gene_info"
+directory <- "D:/2016è¯•é¢˜/B/Bé¢˜é™„ä»¶/gene_info"
 fileList <- list.files(directory)
 
 dirPaths <- paste(directory,"/",fileList,sep = "")
@@ -415,7 +415,7 @@ confusionMatrix(Pred,testing$phenotype,positive = "1")
 #######                     question3
 #######################################################################
 set.seed(2333)
-directory <- "C:/Users/Hansel/Downloads/2016ÊÔÌâ/B/BÌâ¸½¼ş/gene_info"
+directory <- "C:/Users/Hansel/Downloads/2016è¯•é¢˜/B/Bé¢˜é™„ä»¶/gene_info"
 fileList <- list.files(directory)
 
 dirPaths <- paste(directory,"/",fileList,sep = "")
@@ -471,7 +471,7 @@ names(gene_info_list) <- fileList
 # 
 # ggplot(dataFrame_plot,aes(x=id,y=accuracy))+geom_line()
 #########################################
-#####zÕÒµ½ÓëÎÊÌâ2Î»µãÏà¹Ø»ùÒò
+#####zæ‰¾åˆ°ä¸é—®é¢˜2ä½ç‚¹ç›¸å…³åŸºå› 
 gene_index <- c()
 gene_snp_list <- c()
 for(i in 1:300){
@@ -482,7 +482,7 @@ for(i in 1:300){
     }
 }
 
-#####¼ÆËãËùÓĞÉ¸Ñ¡»ùÒòÁªºÏÔ¤²âÖµ
+#####è®¡ç®—æ‰€æœ‰ç­›é€‰åŸºå› è”åˆé¢„æµ‹å€¼
 filterCol <- gene_snp_list
 dataFilter <- test[,filterCol]
 dataFilter <- cbind(dataFilter,phenotype=test$phenotype)
@@ -501,7 +501,7 @@ modFit <- randomForest(phenotype~.,ntree=1500,
 Pred <- predict(modFit,newdata=testing)
 conFusinMat <- confusionMatrix(Pred,testing$phenotype,positive = "1")
 
-#######ÒÀ´ÎÈ¥µôÒ»¸ö»ùÒò£¬¼ÆËãÊ£Óà»ùÒòµÄÔ¤²âÖµ
+#######ä¾æ¬¡å»æ‰ä¸€ä¸ªåŸºå› ï¼Œè®¡ç®—å‰©ä½™åŸºå› çš„é¢„æµ‹å€¼
 acc_container_2 <- c()
 for(i in 1:24){
     filterCol <- unlist(gene_info_list[gene_index[-i]])
@@ -533,7 +533,7 @@ ques3_gene_selct <- names(gene_info_list[gene_index])
 ########################################################################
 #######                           question4
 #########################################################################
-multi_phenos <- read.table("C:/Users/Hansel/Downloads/2016ÊÔÌâ/B/BÌâ¸½¼ş/multi_phenos.txt")
+multi_phenos <- read.table("C:/Users/Hansel/Downloads/2016è¯•é¢˜/B/Bé¢˜é™„ä»¶/multi_phenos.txt")
 
 prob_matrix <- matrix(0,nrow = 10,ncol=9445)
 for(i in 1:9445){
@@ -562,7 +562,7 @@ for(i in 1:9445){
 # sum(multi_phenos_one_false==col_val_true)/1000
 
 
-######Ëæ»úÌ°ĞÄËã·¨
+######éšæœºè´ªå¿ƒç®—æ³•
 res_row <- c(-1:-10,0)
 prob_matrix_test <- prob_matrix
 
@@ -585,7 +585,7 @@ res_data_frame <- data.frame(matrix(res_data_list,nrow = 1000,ncol = 11,byrow = 
 ggplot(data=res_data_frame,aes(x=1:1000,y=X11)) + geom_line()
 
 ##############################################
-#####½«±íĞÍ½øĞĞ±àÂë
+#####å°†è¡¨å‹è¿›è¡Œç¼–ç 
 
 # multi_labels=c()
 
@@ -667,8 +667,8 @@ p <- ggplot(data = ques4_result_plot_melt) +
     theme_classic() + 
     theme(axis.ticks = element_blank(),
           axis.line = element_blank()) + 
-    xlab('Î»µã') +
-    ylab('ĞÔ×´')
+    xlab('ä½ç‚¹') +
+    ylab('æ€§çŠ¶')
 print(p)
 
 write.csv(ques4_pvalue[-frame_index,],file = "pvalue")
