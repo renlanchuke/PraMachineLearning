@@ -32,6 +32,7 @@ genesDataQ1 <- sapply(genotype, function(e){
 ######分别对每一个SNP位点作显著性校验
 library(limma)
 library(caret)
+library(randomForest)
 modLimma <- model.matrix(~phenotype$V1)
 fitLimma <- lmFit(t(genesDataQ1),modLimma)
 ebayes_limma <- ebayes(fitLimma)
