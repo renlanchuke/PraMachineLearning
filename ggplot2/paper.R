@@ -8,22 +8,30 @@ sstate<- function(x,N,k,c){
 }
 
 pstate <- function(x,N,k,c){
-    (1-(1-x)^N)/(N*x*(1-x)^(N-1))-log2(k)/(2*c*(k-N))-log2(k)/(2*c*(k-N)*(1-x)^(N-1))
+    log2(k)*(1-x)^(N-1)/2+c*(k-1)/2-c*(k-N)*(1-(1-x)^N)/(N*x)
 }
 
+b_c_rate <- function(k,N,c){
+    log(k)/(c*(k-N))
+}
 
+x_index <- seq(0.0001,0.9999,by=0.01)
+
+y_index <- pstate(x_index,4,20,0.4)
+plot(x=x_index,y_index)
 plot_x_k <- function(N,c,len){
     k_array=(N+1):(N+len)
     results = c()
  
     for(i in k_array){
-        tryCatch({
-            temRes =uniroot(sstate,c(0.0001,0.9999),N=N,k=i,c=c,tol = 0.0001)
-            results = c(results,temRes$root)
+        temRes = tryCatch({
+            uniroot(sstate,c(0.0001,0.9999),N=N,k=i,c=c,tol = 0.0001)$root
+               
         },  error=function(e){
-            print("no solver")
-            
+            print("ok")
+            0
         })
+        results <- c(results,temRes)
     }
     resultFrame <- data.frame(k=k_array[1:length(results)],x_eq=results)
   
@@ -34,12 +42,13 @@ plot_x_k2 <- function(N,c,len){
    
     results2=c()
     for(i in k_array){
-       tryCatch({
-           temRes2 =uniroot(pstate,c(0.0001,0.9999),N=N,k=i,c=c,tol = 0.0001)
-            results2=c(results2,temRes2$root)
-            },error=function(){
-                results2=c(results2,0)
+       temRes=tryCatch({
+           temRes =uniroot(pstate,c(0.0001,0.9999),N=N,k=i,c=c,tol = 0.0001)$root
+           
+            },error=function(e){
+                1
             })
+       results2=c(results2,temRes)
        
         
     }
@@ -47,9 +56,15 @@ plot_x_k2 <- function(N,c,len){
   
 }
 
-resFrame <- plot_x_k(5,0.2,20)
-resFrame2 <- plot_x_k(3,0.2,20)
-resFrame3 <- plot_x_k(7,0.2,20)
+resFrame <- plot_x_k(5,0.4,10)
+resFrame2 <- plot_x_k2(5,0.4,10)
+resFrame3 <-b_c_rate(resFrame$k,5,0.4)
+resFrame3 <- data.frame(k=resFrame$k,x_eq=resFrame3)
+
+
+###计算惩罚机制下均衡解
+
+
 # frame_bind <- cbind(resFrame,resFrame2,resFrame3)
 # names(frame_bind) <- c("k1","x1","k2","x2","k3","x3")
 
@@ -63,15 +78,17 @@ resFrame3 <- plot_x_k(7,0.2,20)
 # 
 # p <- p+theme(legend.position="right")
 
-data_rbind <- rbind(resFrame2,resFrame,resFrame3)
-label <- c(rep("N=3",20),rep("N=5",20),rep("N=7",20))
+data_rbind <- rbind(resFrame2,resFrame)
+label <- c(rep("P_DGG",10),rep("DGG",10))
 data_rbind[,"label"] <- as.factor(label)
 
 P <- ggplot(data = data_rbind,aes(x=k,y=x_eq,color=label,shape=label))+
-    geom_line()+geom_point(size=4)
-
+    geom_line()+geom_point(size=5)
+previous_theme <- theme_set(theme_bw(base_size = 20))
 P <- P+xlab("K")+ylab("Frequency of Cooperation")
 p <- P+theme(legend.position=c(0.9,0.8),legend.title=element_blank())
+p <- p+scale_x_continuous(breaks=6:15)
+
 
 ###########################
 #####compare c vs x
@@ -94,14 +111,13 @@ p <- P+theme(legend.position=c(0.9,0.8),legend.title=element_blank())
 
 ######################################################################################
 #####dynamic evolution simulation
-set.seed(2333)
-iniProb <- 0.1
+iniProb <- 0.3
 poplation <- c(rep(1,iniProb*2000),rep(0,2000-iniProb*2000))
 poplation <- sample(poplation)
 payoff <- rep(0,100)
-k=6
+k=15
 N=5
-c=0.1
+c=0.4
 
 b_payoff <- log2(k)
 cooperater <- function(NC){
@@ -110,14 +126,14 @@ cooperater <- function(NC){
 
 defector <- function(NC){
     if(NC>0){
-        log2(k)/2
+        log2(k)
     }else{
         0
     }
 }
 
 getAgentPayoff <- function(){
-    agent = sample(1:2000,6,replace = TRUE)
+    agent = sample(1:2000,5,replace = TRUE)
     NC = sum(poplation[agent])
     
     index = sample(agent,1)
@@ -141,11 +157,18 @@ for(i in 1:100000){
     
     trans_prob <- (agent_i$pay-agent_j$pay)/b_payoff
     
+    
     if(trans_prob < 0){
+        if(trans_prob < -1){
+            trans_prob=-1
+        }
         poplation[agent_i$ind]=sample(c(poplation[agent_i$ind],poplation[agent_j$ind]),
                                       1,prob = c(1+trans_prob,-trans_prob))
     }
     if(trans_prob>0){
+        if(trans_prob > 1){
+            trans_prob=1
+        }
         poplation[agent_j$ind]=sample(c(poplation[agent_j$ind],poplation[agent_i$ind]),
                                       1,prob = c(1-trans_prob,trans_prob))
     }
@@ -154,14 +177,55 @@ for(i in 1:100000){
     coop_array[i]=sum(poplation)
 }
 
-coop_frame <- data.frame(coop_frame,sum2=coop_array)
-qplot(x=ind,y=sum2/2000,data = coop_frame)
-ggplot(data = coop_frame)+geom_point(aes(x=ind,y=sum/2000),colour="darkblue")
+coop_frame <- data.frame(coop_array)
+qplot(x=1:100000,y=coop_frame$coop_array/2000,data = coop_frame)
 
-feimi <- function(x){
-    beta=0.9
-    1/(1+exp(-beta*x))
+
+# feimi <- function(x){
+#     beta=0.9
+#     1/(1+exp(-beta*x))
+# }
+simu_result=c()
+for(k in 6:15){
+    b_payoff <- log2(k)
+    cooper=0
+    for(j in 1:50){
+        iniProb <- 0.3
+        poplation <- c(rep(1,iniProb*2000),rep(0,2000-iniProb*2000))
+        poplation <- sample(poplation)
+        print(sum(poplation))
+        N <- 5
+        
+        for(i in 1:100000){
+            agent_i <- getAgentPayoff()
+            agent_j <- getAgentPayoff()
+            
+            trans_prob <- (agent_i$pay-agent_j$pay)/b_payoff
+            
+            if(trans_prob < 0){
+                if(trans_prob < -1){
+                    trans_prob=-1
+                }
+                poplation[agent_i$ind]=sample(c(poplation[agent_i$ind],poplation[agent_j$ind]),
+                                              1,prob = c(1+trans_prob,-trans_prob))
+            }
+            if(trans_prob>0){
+                if(trans_prob > 1){
+                    trans_prob=1
+                }
+                poplation[agent_j$ind]=sample(c(poplation[agent_j$ind],poplation[agent_i$ind]),
+                                              1,prob = c(1-trans_prob,trans_prob))
+            }
+        }
+        cooper=cooper+sum(poplation)
+    }
+    print(cooper/(2000*50))
+    simu_result <- c(simu_result,cooper/(2000*50))
 }
+
+
+
+   
 #####################################################################################
 #####penalty simunation
 set.seed(2333)
@@ -171,7 +235,7 @@ poplation <- sample(poplation)
 record <- rep(0,2000)
 k=6
 N=5
-c=0.1
+c=0.4
 
 b_payoff <- log2(k)
 cooperater <- function(NC){
@@ -188,7 +252,7 @@ defector <- function(NC){
 
 getAgentPayoff <- function(){
     index_array=1:2000
-    agents1 = sample(index_array,6,replace = FALSE)
+    agents1 = sample(index_array,5,replace = FALSE)
     index=agents1[1]
     sum=getPayoff(agents1)
     
@@ -241,6 +305,9 @@ for(i in 1:100000){
 
 coop_frame <- data.frame(ind=1:100000,sum=coop_array)
 qplot(x=ind,y=sum/2000,data = coop_frame)
+
+
+
 #############################################################
 #######penalty2
 set.seed(2333)
@@ -252,7 +319,7 @@ k=6
 N=5
 c=0.1
 
-b_payoff <- log2(k)
+
 cooperater <- function(NC){
     b_payoff-c*(k-N)/NC
 }
